@@ -2,12 +2,14 @@ import random
 import statistics
 
 import numpy as np
+
 import matplotlib.pyplot as plt
 from sklearn import datasets, metrics
 from sklearn.decomposition import PCA
 from sklearn.metrics import classification_report
 from sklearn.model_selection import train_test_split, KFold
 from sklearn.neighbors import KNeighborsClassifier
+from sklearn.preprocessing import StandardScaler
 
 data_set = datasets.load_breast_cancer()
 X = data_set.data
@@ -42,6 +44,8 @@ plt.xlim(x_min, x_max)
 plt.ylim(y_min, y_max)
 
 plt.show()
+
+X = StandardScaler().fit_transform(X)
 
 print('Covariation matrix of data set:')
 cov_X = np.cov(X.T)
@@ -83,14 +87,6 @@ plt.show()
 plt.scatter(range(number_of_components), y=explained_variance_reduced)
 plt.show()
 
-# X_std = StandardScaler().fit_transform(X)
-#
-# cov_X_std = np.cov(X_std.T)
-# print(cov_X_std)
-#
-# eig_vals_std, eig_vecs_std = np.linalg.eig(cov_X_std)
-# print(eig_vals_std)
-
 # part 2
 X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=0.1)
 k = random.randint(2, 5)
@@ -113,20 +109,21 @@ for score_function in [metrics.recall_score, metrics.accuracy_score, metrics.f1_
         variances = []
         possible_k_neigh = range(2, 21)
         for k_neigh in possible_k_neigh:
-            print("k_neigh is " + str(k_neigh) + ", k_fold is " + str(k_fold))
+            #print("k_neigh is " + str(k_neigh) + ", k_fold is " + str(k_fold))
             neigh = KNeighborsClassifier(n_neighbors=k_neigh)
             neigh.fit(X_train, y_train)
             kf = KFold(n_splits=k_fold)
             scores = [score_function(y[test], neigh.predict(X[test])) for _, test in kf.split(X)]
-            print(scores)
-            print(statistics.mean(scores))
-            print(statistics.variance(scores))
+            #print(scores)
+            #print(statistics.mean(scores))
+            #print(statistics.variance(scores))
             means.append(statistics.mean(scores))
             variances.append(statistics.variance(scores))
         plt.scatter(possible_k_neigh, means, label="k_fold is " + str(k_fold))
         plt.title(score_function.__name__)
         plt.xlabel('k_neigh')
         plt.ylabel('Mean score')
+        print("for k_fold = " + str(k_fold) + " and " + score_function.__name__ + " best mean is " + str(max(means)) + " with k_neigh = " + str(possible_k_neigh[means.index(max(means))]))
     plt.legend()
     plt.show()
 
@@ -152,19 +149,20 @@ for score_function in [metrics.recall_score, metrics.accuracy_score, metrics.f1_
         variances = []
         possible_k_neigh = range(2, 21)
         for k_neigh in possible_k_neigh:
-            print("k_neigh is " + str(k_neigh) + ", k_fold is " + str(k_fold))
+            #print("k_neigh is " + str(k_neigh) + ", k_fold is " + str(k_fold))
             neigh = KNeighborsClassifier(n_neighbors=k_neigh)
             neigh.fit(X_train, y_train)
             kf = KFold(n_splits=k_fold)
             scores = [score_function(y[test], neigh.predict(X_reduced[test])) for _, test in kf.split(X)]
-            print(scores)
-            print(statistics.mean(scores))
-            print(statistics.variance(scores))
+            #print(scores)
+            #print(statistics.mean(scores))
+            #print(statistics.variance(scores))
             means.append(statistics.mean(scores))
             variances.append(statistics.variance(scores))
         plt.scatter(possible_k_neigh, means, label="k_fold is " + str(k_fold))
         plt.title(score_function.__name__)
         plt.xlabel('k_neigh')
         plt.ylabel('Mean score')
+        print("for k_fold = " + str(k_fold) + " and " + score_function.__name__ + " best mean is " + str(max(means)) + " with k_neigh = " + str(possible_k_neigh[means.index(max(means))]))
     plt.legend()
     plt.show()
