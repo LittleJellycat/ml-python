@@ -123,10 +123,11 @@ for score_function in [metrics.recall_score, metrics.accuracy_score, metrics.f1_
             print(statistics.variance(scores))
             means.append(statistics.mean(scores))
             variances.append(statistics.variance(scores))
-        plt.scatter(possible_k_neigh, means)
+        plt.scatter(possible_k_neigh, means, label="k_fold is " + str(k_fold))
         plt.title(score_function.__name__)
         plt.xlabel('k_neigh')
         plt.ylabel('Mean score')
+    plt.legend()
     plt.show()
 
 # part 3
@@ -161,8 +162,9 @@ for score_function in [metrics.recall_score, metrics.accuracy_score, metrics.f1_
             print(statistics.variance(scores))
             means.append(statistics.mean(scores))
             variances.append(statistics.variance(scores))
-        plt.scatter(possible_k_neigh, means)
+        plt.scatter(possible_k_neigh, means, label="k_fold is " + str(k_fold))
         plt.title(score_function.__name__)
         plt.xlabel('k_neigh')
         plt.ylabel('Mean score')
+    plt.legend()
     plt.show()
