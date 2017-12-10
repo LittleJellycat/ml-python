@@ -10,12 +10,12 @@ import pandas as pd
 from matplotlib import pyplot as plt
 from nltk.stem.snowball import SnowballStemmer
 from scipy.cluster.hierarchy import ward, dendrogram
-from scipy.spatial.distance import cdist
+from scipy.spatial.distance import cdist, sqeuclidean
 from sklearn.cluster import KMeans
 from sklearn.feature_extraction.text import TfidfVectorizer
-from sklearn.metrics.pairwise import cosine_distances
+from sklearn.metrics.pairwise import cosine_distances, euclidean_distances
 
-data_set = [json.loads(data) for data in codecs.open(filename="post_comments.json", encoding="utf-8").readlines()]
+data_set = [json.loads(data) for data in codecs.open(filename="posts_comments_2.json", encoding="utf-8").readlines()]
 texts = [data['text'] for data in data_set]
 
 # basic text preprocessing
@@ -56,24 +56,39 @@ tfidf_vectorizer = TfidfVectorizer(max_df=0.8,
 tfidf_matrix = tfidf_vectorizer.fit_transform(texts)
 terms = tfidf_vectorizer.get_feature_names()
 dist = 1 - cosine_distances(tfidf_matrix)
+# dist = euclidean_distances(tfidf_matrix)
+# -----
+distortions = []
+Ks = range(1, 10)
+km = [KMeans(n_clusters=i) for i in Ks]
+score = [km[i].fit(tfidf_matrix).score(tfidf_matrix) for i in range(len(km))]
+plt.plot(Ks, score)
+plt.show()
+# -----
 
-# k cluster
-num_clusters = 5
-km = KMeans(n_clusters=num_clusters)
-km.fit(tfidf_matrix)
+num_clusters = 6
+km = km[num_clusters]
 
 clusters = km.labels_.tolist()
 
 print("Centers of clusters:")
 print()
 order_centroids = km.cluster_centers_.argsort()[:, ::-1]
+
+
+def cluster_size(clust_num, labels_array): #numpy
+    return np.where(labels_array == clust_num)[0].size
+
+
 for i in range(num_clusters):
     print("Cluster %d words:" % i, end='')
     for ind in order_centroids[i, :6]:
         print(' %s' % vocab_frame.ix[terms[ind].split(' ')].values.tolist()[0][0], end=',')
+    # print(cluster_size(i, km.labels_))
     print()
 
 linkage_matrix = ward(dist)
 fig, ax = plt.subplots(figsize=(15, 20))
 ax = dendrogram(linkage_matrix, orientation="right", labels=np.array([data['id'] for data in data_set]))
+
 plt.show()
